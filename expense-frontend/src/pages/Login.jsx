@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/authService.js";
 
+import {toast} from "sonner";
+
 const Login = () => {
   const navigate = useNavigate();
 
@@ -25,6 +27,7 @@ const Login = () => {
       const data = await loginUser(formData);
 
       localStorage.setItem("user", JSON.stringify(data));
+      toast.success("Login successful");
       navigate("/");
     } catch (error) {
       console.log(error);
