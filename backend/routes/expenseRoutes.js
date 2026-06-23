@@ -21,6 +21,6 @@ router.post("/", protect, addExpense);
 router.delete("/:id", protect, deleteExpense);
 
 // Update expense
-router.delete("/:id", protect, updateExpense);
+router.put("/:id", protect, updateExpense);
 
 module.exports = router;
