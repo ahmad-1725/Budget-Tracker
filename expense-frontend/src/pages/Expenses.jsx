@@ -250,9 +250,8 @@ function Expenses() {
                 shadow-lg
               "
             >
-                         {editingId ? "Update Transaction" : "Add Transaction"}
-
-            </button>
+              {editingId ? "Update Transaction" : "Add Transaction"}
+S            </button>
           </form>
         </div>
 
@@ -352,7 +351,11 @@ function Expenses() {
         </div>
       </div>
       {showModal && (
-        <ConfirmModal onConfirm={confirmDelete} onCancel={cancelDelete} category={category } />
+        <ConfirmModal
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+          category={category}
+        />
       )}
     </div>
   );

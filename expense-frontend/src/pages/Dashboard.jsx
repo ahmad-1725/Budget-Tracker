@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getDashboardData } from "../services/dashboardService";
+import ChatModal from "../modals/ChatModal";
 
 import {
   PieChart,
@@ -14,8 +15,11 @@ import {
   CartesianGrid,
 } from "recharts";
 
+
 function Dashboard() {
   const [data, setData] = useState(null);
+
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,7 +51,6 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-slate-900 text-white p-6">
       <h1 className="text-4xl font-bold mb-8">ExpenseIQ Dashboard</h1>
-
       {/* SUMMARY CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         <div className="bg-slate-800 p-6 rounded-2xl">
@@ -67,7 +70,6 @@ function Dashboard() {
           <p className="text-3xl font-bold mt-2">${summary.balance ?? 0}</p>
         </div>
       </div>
-
       {/* CHARTS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
         {/* PIE CHART */}
@@ -107,7 +109,6 @@ function Dashboard() {
           </ResponsiveContainer>
         </div>
       </div>
-
       {/* RECENT TRANSACTIONS */}
       <div className="bg-slate-800 p-6 rounded-2xl">
         <h2 className="text-2xl font-bold mb-6">Recent Transactions</h2>
@@ -138,6 +139,26 @@ function Dashboard() {
           </div>
         )}
       </div>
+      {/* Floating decorative circle */}
+      <button
+        onClick={() => setShowModal(true)}
+        className="
+            fixed bottom-6 right-6
+            w-14 h-14
+            rounded-full
+            bg-linear-to-r from-blue-500 to-purple-600
+            text-white
+            shadow-lg
+            hover:scale-110
+            transition-all
+            flex items-center justify-center
+            text-2xl
+          "
+      >
+        💬
+      </button>{" "}
+      {/* Modal */}
+      {showModal && <ChatModal setShowModal={setShowModal} />}{" "}
     </div>
   );
 }

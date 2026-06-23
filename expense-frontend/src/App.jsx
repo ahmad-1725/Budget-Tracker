@@ -15,7 +15,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 function App() {
   return (
     <>
-     <Toaster richColors position="top-right" />
+      <Toaster richColors position="top-right" />
       <Routes>
         <Route
           path="/"
