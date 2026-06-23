@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { FaArrowUp, FaArrowDown, FaWallet } from "react-icons/fa";
-
 import { toast } from "sonner";
 
-import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 import ConfirmModal from "../modals/ConfirmModal";
 
 import {
@@ -18,8 +17,8 @@ function Expenses() {
   const [editingId, setEditingId] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [category, setCategory] = useState(null);
-
   const [showModal, setShowModal] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -28,7 +27,6 @@ function Expenses() {
     type: "expense",
   });
 
-  // Fetch Expenses
   const fetchExpenses = async () => {
     try {
       const data = await getExpenses();
@@ -42,7 +40,6 @@ function Expenses() {
     fetchExpenses();
   }, []);
 
-  // Handle Input
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -50,20 +47,16 @@ function Expenses() {
     });
   };
 
-  // Add Expense
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       if (editingId) {
         await updateExpense(editingId, formData);
-
         toast.success("Transaction updated");
-
         setEditingId(null);
       } else {
         await addExpense(formData);
-
         toast.success("Transaction added");
       }
 
@@ -80,7 +73,6 @@ function Expenses() {
     }
   };
 
-  // Delete Expense
   const handleDeleteClick = (id, category) => {
     setDeleteId(id);
     setCategory(category);
@@ -108,7 +100,6 @@ function Expenses() {
 
   const handleEdit = (item) => {
     setEditingId(item._id);
-
     setFormData({
       title: item.title,
       amount: item.amount,
@@ -116,204 +107,153 @@ function Expenses() {
       type: item.type,
     });
   };
-  // Dashboard Stats
+
   const totalIncome = expenses
-    .filter((item) => item.type === "income")
-    .reduce((acc, item) => acc + Number(item.amount), 0);
+    .filter((i) => i.type === "income")
+    .reduce((a, i) => a + Number(i.amount), 0);
 
   const totalExpense = expenses
-    .filter((item) => item.type === "expense")
-    .reduce((acc, item) => acc + Number(item.amount), 0);
+    .filter((i) => i.type === "expense")
+    .reduce((a, i) => a + Number(i.amount), 0);
 
   const balance = totalIncome - totalExpense;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 text-white p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-5xl font-extrabold bg-linear-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-            Expense Tracker
-          </h1>
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-hidden">
 
-          <p className="text-slate-400 mt-3 text-lg">
-            Track your income and expenses with style.
+    {/* SIDEBAR */}
+<Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
+    {/* MAIN CONTENT */}
+<div
+  className={`
+    flex-1 relative p-6 overflow-y-auto
+    transition-all duration-300
+    ${sidebarOpen ? "ml-64" : "ml-20"}
+  `}
+>
+      {/* Glow Background */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/20 blur-[130px] rounded-full" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-500/20 blur-[130px] rounded-full" />
+
+      <div className="relative">
+
+        {/* HEADER */}
+        <div className="mb-10">
+          <h1 className="text-5xl font-extrabold">
+            Expense<span className="text-blue-400">Tracker</span>
+          </h1>
+          <p className="text-white/60 mt-2">
+            Track money flows with clarity and control
           </p>
         </div>
 
-        {/* Summary Cards */}
+        {/* STATS */}
         <div className="grid md:grid-cols-3 gap-6 mb-10">
-          <div className="bg-linear-to-r from-green-500 to-emerald-600 rounded-3xl p-6 shadow-xl">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-white/80">Income</p>
-                <h2 className="text-3xl font-bold mt-2">
-                  ${totalIncome.toFixed(2)}
-                </h2>
+
+          {[
+            {
+              title: "Income",
+              value: totalIncome,
+              icon: <FaArrowUp />,
+              color: "from-green-400 to-emerald-600",
+            },
+            {
+              title: "Expenses",
+              value: totalExpense,
+              icon: <FaArrowDown />,
+              color: "from-red-400 to-rose-600",
+            },
+            {
+              title: "Balance",
+              value: balance,
+              icon: <FaWallet />,
+              color: "from-blue-400 to-indigo-600",
+            },
+          ].map((card, i) => (
+            <div
+              key={i}
+              className="relative p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 hover:scale-[1.03] transition"
+            >
+              <div className={`absolute inset-0 opacity-10 bg-gradient-to-r ${card.color} rounded-2xl`} />
+
+              <div className="flex justify-between items-center relative">
+                <div>
+                  <p className="text-white/60">{card.title}</p>
+                  <h2 className="text-3xl font-bold mt-2">
+                    ${card.value.toFixed(2)}
+                  </h2>
+                </div>
+                <div className="text-white/70 text-xl">{card.icon}</div>
               </div>
-
-              <FaArrowUp size={32} />
             </div>
-          </div>
-
-          <div className="bg-linear-to-r from-red-500 to-pink-600 rounded-3xl p-6 shadow-xl">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-white/80">Expenses</p>
-                <h2 className="text-3xl font-bold mt-2">
-                  ${totalExpense.toFixed(2)}
-                </h2>
-              </div>
-
-              <FaArrowDown size={32} />
-            </div>
-          </div>
-
-          <div className="bg-linear-to-r from-blue-500 to-indigo-600 rounded-3xl p-6 shadow-xl">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-white/80">Balance</p>
-                <h2 className="text-3xl font-bold mt-2">
-                  ${balance.toFixed(2)}
-                </h2>
-              </div>
-
-              <FaWallet size={32} />
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Form Section */}
-        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl mb-10">
-          <h2 className="text-2xl font-bold mb-6">
+        {/* FORM */}
+        <div className="mb-10 p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10">
+          <h2 className="text-xl font-semibold mb-6">
             {editingId ? "Update Transaction" : "Add Transaction"}
           </h2>
 
           <form
             onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-4 gap-4"
+            className="grid md:grid-cols-4 gap-4"
           >
-            <input
-              type="text"
-              name="title"
-              placeholder="Transaction Title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              className="p-3 rounded-xl bg-slate-800/70 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 outline-none transition"
-            />
-
-            <input
-              type="number"
-              name="amount"
-              placeholder="Amount"
-              value={formData.amount}
-              onChange={handleChange}
-              required
-              className="p-3 rounded-xl bg-slate-800/70 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 outline-none transition"
-            />
-
-            <input
-              type="text"
-              name="category"
-              placeholder="Category"
-              value={formData.category}
-              onChange={handleChange}
-              required
-              className="p-3 rounded-xl bg-slate-800/70 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 outline-none transition"
-            />
+            {["title", "amount", "category"].map((field) => (
+              <input
+                key={field}
+                name={field}
+                value={formData[field]}
+                onChange={handleChange}
+                placeholder={field}
+                className="p-3 rounded-xl bg-white/5 border border-white/10 focus:border-blue-400 outline-none"
+              />
+            ))}
 
             <select
               name="type"
               value={formData.type}
               onChange={handleChange}
-              className="p-3 rounded-xl bg-slate-800/70 border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 outline-none transition"
+              className="p-3 rounded-xl bg-white/5 border border-white/10"
             >
-              <option value="expense">Expense</option>
-              <option value="income">Income</option>
+              <option className="text-black" value="expense">Expense</option>
+              <option className="text-black" value="income">Income</option>
             </select>
 
             <button
               type="submit"
-              className="
-                md:col-span-4
-                bg-linear-to-r
-                from-blue-500
-                via-purple-500
-                to-pink-500
-                hover:scale-[1.02]
-                transition-all
-                duration-300
-                p-3
-                rounded-xl
-                font-semibold
-                shadow-lg
-              "
+              className="md:col-span-4 p-3 rounded-xl font-semibold bg-gradient-to-r from-blue-500 to-purple-600 hover:scale-[1.02] transition"
             >
               {editingId ? "Update Transaction" : "Add Transaction"}
-S            </button>
+            </button>
           </form>
         </div>
 
-        {/* Transactions */}
-        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl">
-          <h2 className="text-2xl font-bold mb-6">All Transactions</h2>
+        {/* TRANSACTIONS */}
+        <div className="p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10">
+          <h2 className="text-xl font-semibold mb-6">Transactions</h2>
 
           {expenses.length === 0 ? (
-            <div className="text-center py-16">
-              <h3 className="text-2xl text-slate-400 font-semibold">
-                No transactions yet
-              </h3>
-
-              <p className="text-slate-500 mt-2">
-                Start by adding your first income or expense.
-              </p>
-            </div>
+            <p className="text-white/50 text-center py-10">
+              No transactions yet
+            </p>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {expenses.map((item) => (
                 <div
                   key={item._id}
-                  className="
-                    flex
-                    flex-col
-                    md:flex-row
-                    justify-between
-                    md:items-center
-                    gap-4
-                    bg-slate-800/60
-                    border
-                    border-slate-700
-                    p-5
-                    rounded-2xl
-                    hover:border-blue-500
-                    hover:shadow-lg
-                    hover:shadow-blue-500/10
-                    transition-all
-                    duration-300
-                  "
+                  className="flex justify-between items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 transition"
                 >
                   <div>
-                    <h3 className="text-lg font-semibold">{item.title}</h3>
-
-                    <div className="flex items-center gap-3 mt-2">
-                      <p className="text-slate-400">{item.category}</p>
-
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          item.type === "income"
-                            ? "bg-green-500/20 text-green-400"
-                            : "bg-red-500/20 text-red-400"
-                        }`}
-                      >
-                        {item.type}
-                      </span>
-                    </div>
+                    <p className="font-medium">{item.title}</p>
+                    <p className="text-white/50 text-sm">
+                      {item.category}
+                    </p>
                   </div>
 
                   <div className="flex items-center gap-4">
                     <p
-                      className={`text-xl font-bold ${
+                      className={`font-bold ${
                         item.type === "income"
                           ? "text-green-400"
                           : "text-red-400"
@@ -321,25 +261,19 @@ S            </button>
                     >
                       ${item.amount}
                     </p>
+
                     <button
                       onClick={() => handleEdit(item)}
-                      className="bg-yellow-500 px-4 py-2 rounded"
+                      className="px-3 py-1 rounded bg-yellow-500 text-black text-sm"
                     >
                       Edit
                     </button>
+
                     <button
-                      onClick={() => handleDeleteClick(item._id, item.type)}
-                      className="
-                        bg-red-500/20
-                        text-red-400
-                        hover:bg-red-500
-                        hover:text-white
-                        px-4
-                        py-2
-                        rounded-xl
-                        transition-all
-                        duration-300
-                      "
+                      onClick={() =>
+                        handleDeleteClick(item._id, item.category)
+                      }
+                      className="px-3 py-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white text-sm transition"
                     >
                       Delete
                     </button>
@@ -350,6 +284,8 @@ S            </button>
           )}
         </div>
       </div>
+
+      {/* MODAL */}
       {showModal && (
         <ConfirmModal
           onConfirm={confirmDelete}
@@ -357,6 +293,7 @@ S            </button>
           category={category}
         />
       )}
+    </div>
     </div>
   );
 }

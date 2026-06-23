@@ -7,10 +7,12 @@ const ChatModal = ({ setShowModal }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSend = async () => {
+    // if message is empty 
     if (!message.trim()) return;
 
     const userMsg = message;
 
+    // save user's chat
     setChat((prev) => [...prev, { role: "user", text: userMsg }]);
     setMessage("");
 
@@ -19,6 +21,7 @@ const ChatModal = ({ setShowModal }) => {
 
       const data = await sendMessage(userMsg);
 
+      // save AI's chat
       setChat((prev) => [
         ...prev,
         { role: "ai", text: data.reply },
@@ -56,7 +59,7 @@ const ChatModal = ({ setShowModal }) => {
         {/* Header */}
         <div className="p-4 border-b border-white/10 flex justify-between items-center">
           <h2 className="text-white font-semibold">
-            AI Chat Assistant
+           Chat Assistant
           </h2>
 
           <button
@@ -91,7 +94,7 @@ const ChatModal = ({ setShowModal }) => {
 
           {loading && (
             <div className="text-white/70 text-sm">
-              AI is thinking...
+              Thinking...
             </div>
           )}
         </div>
