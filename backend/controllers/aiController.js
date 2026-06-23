@@ -5,6 +5,7 @@ const chatWithAI = async (req, res) => {
   try {
     const { message } = req.body;
 
+    // Get records related to the user
     const expenses = await Expense.find({
       userId: req.user._id,
     });
@@ -12,6 +13,7 @@ const chatWithAI = async (req, res) => {
     let totalIncome = 0;
     let totalExpense = 0;
 
+    // Calculate user's income and expenses
     expenses.forEach((item) => {
       const amount = Number(item.amount);
 
@@ -22,6 +24,7 @@ const chatWithAI = async (req, res) => {
       }
     });
 
+    // Total per category
     const categoryTotals = {};
 
     expenses.forEach((item) => {
@@ -33,23 +36,25 @@ const chatWithAI = async (req, res) => {
 
       categoryTotals[item.category] += amount;
     });
+   
+    // Prompt for the API
     const prompt = `
-You are a financial assistant.
+      You are a financial assistant.
 
-User financial summary:
-- Total Income: $${totalIncome}
-- Total Expenses: $${totalExpense}
-- Remaining Balance: $${totalIncome - totalExpense}
-- Category breakdown: ${JSON.stringify(categoryTotals, null, 2)}
+      User financial summary:
+      - Total Income: $${totalIncome}
+      - Total Expenses: $${totalExpense}
+      - Remaining Balance: $${totalIncome - totalExpense}
+      - Category breakdown: ${JSON.stringify(categoryTotals, null, 2)}
 
-User question:
-${message}
+      User question:
+      ${message}
 
-IMPORTANT:
-- Use ONLY the numbers above.
-- Do NOT guess or recalculate from categories.
-- Keep answer under 100 words.
-`;
+      IMPORTANT:
+      - Use ONLY the numbers above.
+      - Do NOT guess or recalculate from categories.
+      - Keep answer under 100 (50-100) words.
+      `;
 
     const response = await client.chat.completions.create({
       model: "meta-llama/llama-3.1-8b-instruct",
